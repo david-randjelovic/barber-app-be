@@ -10,20 +10,38 @@ use Illuminate\Support\Facades\Auth;
 class ReservationController extends Controller
 {
 
-    public function index()
+    public function activeReservations()
     {
+        $now = now();
         $reservations = Reservation::with('user')
-                            ->get(['reservation_date', 'service_name', 'price', 'user_id'])
-                            ->map(function ($reservation) {
-                                return [
-                                    'date' => $reservation->reservation_date,
-                                    'clientName' => $reservation->user->first_name,
-                                    'serviceType' => $reservation->service_name,
-                                    'price' => $reservation->price
-                                ];
-                            });
+            ->where('reservation_date', '>', $now)
+            ->get()
+            ->map($this->mapReservation());
 
         return response()->json($reservations);
+    }
+
+    public function archivedReservations()
+    {
+        $now = now();
+        $reservations = Reservation::with('user')
+            ->where('reservation_date', '<=', $now)
+            ->get()
+            ->map($this->mapReservation());
+
+        return response()->json($reservations);
+    }
+
+    protected function mapReservation()
+    {
+        return function ($reservation) {
+            return [
+                'date' => $reservation->reservation_date,
+                'clientName' => $reservation->user->first_name ?? '',
+                'serviceType' => $reservation->service_name,
+                'price' => $reservation->price,
+            ];
+        };
     }
 
     public function store(Request $request)

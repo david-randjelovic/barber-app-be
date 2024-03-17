@@ -32,6 +32,19 @@ class ReservationController extends Controller
         return response()->json($reservations);
     }
 
+    public function reservationsForToday()
+    {
+        $todayStart = now()->startOfDay();
+        $todayEnd = now()->endOfDay();
+
+        $reservations = Reservation::with('user')
+                            ->whereBetween('reservation_date', [$todayStart, $todayEnd])
+                            ->get()
+                            ->map($this->mapReservation());
+
+        return response()->json($reservations);
+    }
+
     protected function mapReservation()
     {
         return function ($reservation) {

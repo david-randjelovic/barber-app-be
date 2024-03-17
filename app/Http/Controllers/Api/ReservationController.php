@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Carbon\Carbon;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -39,6 +40,17 @@ class ReservationController extends Controller
 
         $reservations = Reservation::with('user')
                             ->whereBetween('reservation_date', [$now, $todayEnd])
+                            ->get()
+                            ->map($this->mapReservation());
+
+        return response()->json($reservations);
+    }
+
+    public function getReservationsForDate($date)
+    {
+        $date = Carbon::createFromFormat('Y-m-d', $date);
+        $reservations = Reservation::with('user')
+                            ->whereDate('reservation_date', '=', $date)
                             ->get()
                             ->map($this->mapReservation());
 

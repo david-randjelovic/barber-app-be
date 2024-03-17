@@ -34,11 +34,11 @@ class ReservationController extends Controller
 
     public function reservationsForToday()
     {
-        $todayStart = now()->startOfDay();
+        $now = now();
         $todayEnd = now()->endOfDay();
 
         $reservations = Reservation::with('user')
-                            ->whereBetween('reservation_date', [$todayStart, $todayEnd])
+                            ->whereBetween('reservation_date', [$now, $todayEnd])
                             ->get()
                             ->map($this->mapReservation());
 
